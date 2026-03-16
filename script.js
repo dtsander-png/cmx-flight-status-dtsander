@@ -1,52 +1,43 @@
-// API KEYS
+//API KEYS
 
-const flightApiKey = "YOUR_FLIGHT_API_KEY";
+const flightApiKey = "1ba43f5064d5b93c6997aed369497978";
 const weatherApiKey = "f5fb86d39d7cc2cc9d5f7c67db8fb37a";
 
 
-// =========================
-// GET FLIGHT DATA
-// =========================
+//GET FLIGHT DATA
 
 async function getFlights(date = "") {
 
     try {
 
-        if (!date) {
-            date = formatDate(new Date());
+        let arrivalsURL =
+            `https://api.aviationstack.com/v1/flights?access_key=${flightApiKey}&arr_iata=CMX`;
+
+        let departuresURL =
+            `https://api.aviationstack.com/v1/flights?access_key=${flightApiKey}&dep_iata=CMX`;
+
+        if (date !== "") {
+            arrivalsURL += `&flight_date=${date}`;
+            departuresURL += `&flight_date=${date}`;
         }
 
-        const from = `${date}T00:00`;
-        const to = `${date}T11:59`;
+        const arrivalsResponse = await fetch(arrivalsURL);
+        const arrivalsData = await arrivalsResponse.json();
 
-        const url =
-            `https://api.magicapi.dev/api/v1/aedbx/aerodatabox/flights/airports/iata/CMX/${from}/${to}?direction=Both&withCargo=false&withPrivate=false&withCancelled=false`;
+        const departuresResponse = await fetch(departuresURL);
+        const departuresData = await departuresResponse.json();
 
-        const response = await fetch(url, {
-            headers: {
-                "x-api-market-key": flightApiKey
-            }
-        });
-
-        const data = await response.json();
-
-        const arrivals = data.arrivals || [];
-        const departures = data.departures || [];
-
-        displayFlights(arrivals, "arrivals", "arrival");
-        displayFlights(departures, "departures", "departure");
+        displayFlights(arrivalsData.data, "arrivals", "arrival");
+        displayFlights(departuresData.data, "departures", "departure");
 
     } catch (error) {
 
         console.error("Flight API error:", error);
-
     }
 }
 
 
-// =========================
-// DISPLAY FLIGHTS
-// =========================
+//DISPLAY FLIGHTS
 
 function displayFlights(flights, sectionId, type) {
 
@@ -57,7 +48,6 @@ function displayFlights(flights, sectionId, type) {
 
         container.innerHTML = "No flight data available.";
         return;
-
     }
 
     flights.slice(0, 2).forEach(flight => {
@@ -65,53 +55,44 @@ function displayFlights(flights, sectionId, type) {
         const div = document.createElement("div");
         div.className = "flight-card";
 
-        const airline =
-            flight.airline?.name ||
-            flight.airline?.iata ||
-            "Unknown";
-
-        const flightNumber =
-            flight.number ||
-            flight.callSign ||
-            "N/A";
-
-        const location =
+        let location =
             type === "arrival"
-                ? flight.departure?.airport?.name
-                : flight.arrival?.airport?.name;
+                ? flight.departure.airport
+                : flight.arrival.airport;
 
-        const scheduled =
+        let scheduled =
             type === "arrival"
-                ? flight.arrival?.scheduledTime?.local
-                : flight.departure?.scheduledTime?.local;
+                ? flight.arrival.scheduled
+                : flight.departure.scheduled;
 
-        const actual =
+        let actual =
             type === "arrival"
-                ? flight.arrival?.actualTime?.local
-                : flight.departure?.actualTime?.local;
-
-        const status =
-            flight.status || "Unknown";
+                ? flight.arrival.actual
+                : flight.departure.actual;
 
         div.innerHTML = `
-            <b>Airline:</b> ${airline} <br>
-            <b>Flight:</b> ${flightNumber} <br>
+
+            <b>Airline:</b> ${flight.airline.name || "Unknown"} <br>
+
+            <b>Flight:</b> ${flight.flight.iata || "N/A"} <br>
+
             <b>${type === "arrival" ? "From" : "To"}:</b> ${location || "Unknown"} <br>
+
             <b>Scheduled:</b> ${formatTime(scheduled)} <br>
+
             <b>Actual:</b> ${formatTime(actual)} <br>
-            <b>Status:</b> ${status}
+
+            <b>Status:</b> ${flight.flight_status || "Unknown"}
+
         `;
 
         container.appendChild(div);
 
     });
-
 }
 
 
-// =========================
-// FORMAT TIME
-// =========================
+//FORMAT TIME
 
 function formatTime(time) {
 
@@ -120,28 +101,31 @@ function formatTime(time) {
     const date = new Date(time);
 
     return date.toLocaleString();
-
 }
 
 
-// =========================
-// WEATHER DATA
-// =========================
+//WEATHER DATA
 
 async function getWeather() {
 
     try {
 
         const response = await fetch(
+
             `https://api.openweathermap.org/data/2.5/weather?q=Houghton&units=imperial&appid=${weatherApiKey}`
+
         );
 
         const data = await response.json();
 
         const weatherHTML = `
+
             <b>Temperature:</b> ${data.main.temp} °F <br>
+
             <b>Wind Speed:</b> ${data.wind.speed} mph <br>
+
             <b>Conditions:</b> ${data.weather[0].description}
+
         `;
 
         document.getElementById("weather").innerHTML = weatherHTML;
@@ -151,22 +135,20 @@ async function getWeather() {
     } catch (error) {
 
         console.error("Weather API error:", error);
-
     }
-
 }
 
 
-// =========================
-// WEATHER FORECAST
-// =========================
+//WEATHER FORECAST (1–2 DAYS)
 
 async function getForecast() {
 
     try {
 
         const response = await fetch(
+
             `https://api.openweathermap.org/data/2.5/forecast?q=Houghton&units=imperial&appid=${weatherApiKey}`
+
         );
 
         const data = await response.json();
@@ -178,10 +160,15 @@ async function getForecast() {
             const item = data.list[i];
 
             forecastHTML += `
+
                 ${new Date(item.dt_txt).toLocaleString()}<br>
+
                 Temp: ${item.main.temp} °F<br>
+
                 ${item.weather[0].description}
+
                 <hr>
+
             `;
         }
 
@@ -190,15 +177,11 @@ async function getForecast() {
     } catch (error) {
 
         console.error("Forecast API error:", error);
-
     }
-
 }
 
 
-// =========================
-// DATE SEARCH
-// =========================
+//DATE SEARCH
 
 function searchFlights() {
 
@@ -208,17 +191,13 @@ function searchFlights() {
 
         alert("Please select a date");
         return;
-
     }
 
     getFlights(date);
-
 }
 
 
-// =========================
-// WEBCAM AUTO REFRESH
-// =========================
+//AUTO REFRESH WEBCAM
 
 function refreshWebcam() {
 
@@ -227,72 +206,46 @@ function refreshWebcam() {
     if (webcam) {
 
         webcam.src = webcam.src.split("?")[0] + "?t=" + new Date().getTime();
-
     }
-
 }
 
 
-// =========================
-// DATE UTILITIES
-// =========================
 
-function formatDate(date) {
-
-    return date.toISOString().split("T")[0];
-
-}
-
-function loadToday() {
-
-    const today = formatDate(new Date());
-    getFlights(today);
-
-}
-
-function loadYesterday() {
-
-    const d = new Date();
-    d.setDate(d.getDate() - 1);
-
-    getFlights(formatDate(d));
-
-}
-
-function loadTwoDaysAgo() {
-
-    const d = new Date();
-    d.setDate(d.getDate() - 2);
-
-    getFlights(formatDate(d));
-
-}
-
-function loadTomorrow() {
-
-    const d = new Date();
-    d.setDate(d.getDate() + 1);
-
-    getFlights(formatDate(d));
-
-}
-
-
-// =========================
-// INITIAL LOAD
-// =========================
-
+//INITIAL LOAD
 getFlights();
 getWeather();
 
 
-// =========================
-// AUTO UPDATE
-// =========================
-
-setInterval(() => {
-    loadToday();
-}, 300000);
-
+//AUTO UPDATE EVERY 5 MINUTEs
+setInterval(getFlights, 300000);
 setInterval(getWeather, 300000);
 setInterval(refreshWebcam, 60000);
+
+
+//DATE FUNCTIONS
+function formatDate(date) {
+    return date.toISOString().split("T")[0];
+}
+
+function loadToday() {
+    const today = formatDate(new Date());
+    getFlights(today);
+}
+
+function loadYesterday() {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    getFlights(formatDate(d));
+}
+
+function loadTwoDaysAgo() {
+    const d = new Date();
+    d.setDate(d.getDate() - 2);
+    getFlights(formatDate(d));
+}
+
+function loadTomorrow() {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    getFlights(formatDate(d));
+}
