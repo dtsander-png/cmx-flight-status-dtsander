@@ -12,10 +12,10 @@ async function getFlights(date = "") {
     try {
 
         let arrivalsURL =
-            `http://api.aviationstack.com/v1/flights?access_key=${flightApiKey}&arr_iata=CMX`;
+            `https://api.aviationstack.com/v1/flights?access_key=${flightApiKey}&arr_iata=CMX`;
 
         let departuresURL =
-            `http://api.aviationstack.com/v1/flights?access_key=${flightApiKey}&dep_iata=CMX`;
+            `https://api.aviationstack.com/v1/flights?access_key=${flightApiKey}&dep_iata=CMX`;
 
         if (date !== "") {
             arrivalsURL += `&flight_date=${date}`;
