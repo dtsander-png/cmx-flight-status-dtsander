@@ -9,6 +9,22 @@
 
 <h1>CMX Airport Live Flight Status</h1>
 
+
+    
+<h2>Select Flight Date</h2>
+
+<button onclick="loadToday()">Today</button>
+<button onclick="loadYesterday()">Yesterday</button>
+<button onclick="loadTwoDaysAgo()">2 Days Ago</button>
+<button onclick="loadTomorrow()">Tomorrow</button>
+
+<br><br>
+
+<input type="date" id="datePicker">
+<button onclick="searchFlights()">Search</button>
+
+    
+    
 <h2>Arrivals</h2>
 <div id="arrivals"></div>
 
