@@ -4,102 +4,91 @@ const flightApiKey = "1ba43f5064d5b93c6997aed369497978";
 const weatherApiKey = "f5fb86d39d7cc2cc9d5f7c67db8fb37a";
 
 
-//GET FLIGHT DATA
-
+// GET FLIGHT DATA
 async function getFlights(date = "") {
-
     try {
-
-        let arrivalsURL =
-            `https://api.aviationstack.com/v1/flights?access_key=${flightApiKey}&arr_iata=CMX`;
-
-        let departuresURL =
-            `https://api.aviationstack.com/v1/flights?access_key=${flightApiKey}&dep_iata=CMX`;
+        let arrivalsURL = `https://api.aviationstack.com/v1/flights?access_key=${flightApiKey}&arr_iata=CMX`;
+        let departuresURL = `https://api.aviationstack.com/v1/flights?access_key=${flightApiKey}&dep_iata=CMX`;
 
         if (date !== "") {
             arrivalsURL += `&flight_date=${date}`;
             departuresURL += `&flight_date=${date}`;
         }
 
-        const arrivalsResponse = await fetch(arrivalsURL);
-        const arrivalsData = await arrivalsResponse.json();
+        const [arrivalsResponse, departuresResponse] = await Promise.all([
+            fetch(arrivalsURL),
+            fetch(departuresURL)
+        ]);
 
-        const departuresResponse = await fetch(departuresURL);
+        const arrivalsData = await arrivalsResponse.json();
         const departuresData = await departuresResponse.json();
 
-        displayFlights(arrivalsData.data, "arrivals", "arrival");
-        displayFlights(departuresData.data, "departures", "departure");
+        console.log("Arrivals API data:", arrivalsData);
+        console.log("Departures API data:", departuresData);
+
+        displayFlights(arrivalsData.data || [], "arrivals", "arrival");
+        displayFlights(departuresData.data || [], "departures", "departure");
 
     } catch (error) {
-
         console.error("Flight API error:", error);
+        document.getElementById("arrivals").innerHTML = "Error loading arrivals.";
+        document.getElementById("departures").innerHTML = "Error loading departures.";
     }
 }
 
-
-//DISPLAY FLIGHTS
-
+// DISPLAY FLIGHTS
 function displayFlights(flights, sectionId, type) {
-
     const container = document.getElementById(sectionId);
     container.innerHTML = "";
 
     if (!flights || flights.length === 0) {
-
         container.innerHTML = "No flight data available.";
         return;
     }
 
     flights.slice(0, 2).forEach(flight => {
-
         const div = document.createElement("div");
         div.className = "flight-card";
 
-        let location =
-            type === "arrival"
-                ? flight.departure.airport
-                : flight.arrival.airport;
+        // Use optional chaining and fallback values
+        const airline = flight.airline?.name || "Unknown";
+        const flightNumber = flight.flight?.iata || "N/A";
 
-        let scheduled =
-            type === "arrival"
-                ? flight.arrival.scheduled
-                : flight.departure.scheduled;
+        const location = type === "arrival"
+            ? flight.departure?.airport || "Unknown"
+            : flight.arrival?.airport || "Unknown";
 
-        let actual =
-            type === "arrival"
-                ? flight.arrival.actual
-                : flight.departure.actual;
+        const scheduled = type === "arrival"
+            ? flight.arrival?.scheduled || "N/A"
+            : flight.departure?.scheduled || "N/A";
+
+        const actual = type === "arrival"
+            ? flight.arrival?.actual || "N/A"
+            : flight.departure?.actual || "N/A";
+
+        const status = flight.flight_status || "Unknown";
+        const gate = flight.departure?.gate || flight.arrival?.gate || "N/A";
+        const aircraft = flight.aircraft?.registration || "N/A";
 
         div.innerHTML = `
-
-            <b>Airline:</b> ${flight.airline.name || "Unknown"} <br>
-
-            <b>Flight:</b> ${flight.flight.iata || "N/A"} <br>
-
-            <b>${type === "arrival" ? "From" : "To"}:</b> ${location || "Unknown"} <br>
-
+            <b>Airline:</b> ${airline} <br>
+            <b>Flight:</b> ${flightNumber} <br>
+            <b>${type === "arrival" ? "From" : "To"}:</b> ${location} <br>
             <b>Scheduled:</b> ${formatTime(scheduled)} <br>
-
             <b>Actual:</b> ${formatTime(actual)} <br>
-
-            <b>Status:</b> ${flight.flight_status || "Unknown"}
-
+            <b>Status:</b> ${status} <br>
+            <b>Gate:</b> ${gate} <br>
+            <b>Aircraft:</b> ${aircraft} <br>
         `;
 
         container.appendChild(div);
-
     });
 }
 
-
-//FORMAT TIME
-
+// FORMAT TIME
 function formatTime(time) {
-
-    if (!time) return "N/A";
-
+    if (!time || time === "N/A") return "N/A";
     const date = new Date(time);
-
     return date.toLocaleString();
 }
 
