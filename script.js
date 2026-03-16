@@ -221,3 +221,32 @@ getWeather();
 setInterval(getFlights, 300000);
 setInterval(getWeather, 300000);
 setInterval(refreshWebcam, 60000);
+
+
+//DATE FUNCTIONS
+function formatDate(date) {
+    return date.toISOString().split("T")[0];
+}
+
+function loadToday() {
+    const today = formatDate(new Date());
+    getFlights(today);
+}
+
+function loadYesterday() {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    getFlights(formatDate(d));
+}
+
+function loadTwoDaysAgo() {
+    const d = new Date();
+    d.setDate(d.getDate() - 2);
+    getFlights(formatDate(d));
+}
+
+function loadTomorrow() {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    getFlights(formatDate(d));
+}
