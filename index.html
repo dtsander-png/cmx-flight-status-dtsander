@@ -7,36 +7,46 @@
 
 <body>
 
-<h1>CMX Airport Live Flight Status</h1>
+<div class="container">
+    <h1>CMX Airport Live Flight Status</h1>
 
+    <div class="controls">
+        <h2>Select Flight Date</h2>
 
-    
-<h2>Select Flight Date</h2>
+        <div class="button-group">
+            <button onclick="loadToday()">Today</button>
+            <button onclick="loadYesterday()">Yesterday</button>
+            <button onclick="loadTwoDaysAgo()">2 Days Ago</button>
+            <button onclick="loadTomorrow()">Tomorrow</button>
+        </div>
 
-<button onclick="loadToday()">Today</button>
-<button onclick="loadYesterday()">Yesterday</button>
-<button onclick="loadTwoDaysAgo()">2 Days Ago</button>
-<button onclick="loadTomorrow()">Tomorrow</button>
+        <div class="date-search">
+            <input type="date" id="datePicker">
+            <button onclick="searchFlights()">Search</button>
+        </div>
+    </div>
 
-<br><br>
+    <div class="section">
+        <h2>Arrivals</h2>
+        <div id="arrivals"></div>
+    </div>
 
-<input type="date" id="datePicker">
-<button onclick="searchFlights()">Search</button>
+    <div class="section">
+        <h2>Departures</h2>
+        <div id="departures"></div>
+    </div>
 
-    
-    
-<h2>Arrivals</h2>
-<div id="arrivals"></div>
+    <div class="section">
+        <h2>Weather</h2>
+        <div id="weather"></div>
+        <div id="forecast"></div>
+    </div>
 
-<h2>Departures</h2>
-<div id="departures"></div>
-
-<h2>Weather</h2>
-<div id="weather"></div>
-<div id="forecast"></div>
-
-<h2>Airport Webcam</h2>
-<img id="webcam" src="http://webcam.cmxairport.com/webcam.jpg">
+    <div class="section">
+        <h2>Airport Webcam</h2>
+        <img id="webcam" src="http://webcam.cmxairport.com/webcam.jpg">
+    </div>
+</div>
 
 <script src="script.js"></script>
 
