@@ -197,19 +197,6 @@ function searchFlights() {
 }
 
 
-//AUTO REFRESH WEBCAM
-
-function refreshWebcam() {
-
-    const webcam = document.getElementById("webcam");
-
-    if (webcam) {
-
-        webcam.src = webcam.src.split("?")[0] + "?t=" + new Date().getTime();
-    }
-}
-
-
 
 //INITIAL LOAD
 getFlights();
