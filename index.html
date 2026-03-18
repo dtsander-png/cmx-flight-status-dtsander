@@ -1,8 +1,15 @@
 <!DOCTYPE html>
+
 <html>
 <head>
     <title>CMX Airport Flight Status</title>
     <link rel="stylesheet" href="style.css">
+
+```
+<!-- HLS.js for livestream support -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+```
+
 </head>
 
 <body>
@@ -10,45 +17,70 @@
 <div class="container">
     <h1>CMX Airport Live Flight Status</h1>
 
-    <div class="controls">
-        <h2>Select Flight Date</h2>
+```
+<div class="controls">
+    <h2>Select Flight Date</h2>
 
-        <div class="button-group">
-            <button onclick="loadToday()">Today</button>
-            <button onclick="loadYesterday()">Yesterday</button>
-            <button onclick="loadTwoDaysAgo()">2 Days Ago</button>
-            <button onclick="loadTomorrow()">Tomorrow</button>
-        </div>
-
-        <div class="date-search">
-            <input type="date" id="datePicker">
-            <button onclick="searchFlights()">Search</button>
-        </div>
+    <div class="button-group">
+        <button onclick="loadToday()">Today</button>
+        <button onclick="loadYesterday()">Yesterday</button>
+        <button onclick="loadTwoDaysAgo()">2 Days Ago</button>
+        <button onclick="loadTomorrow()">Tomorrow</button>
     </div>
 
-    <div class="section">
-        <h2>Arrivals</h2>
-        <div id="arrivals"></div>
-    </div>
-
-    <div class="section">
-        <h2>Departures</h2>
-        <div id="departures"></div>
-    </div>
-
-    <div class="section">
-        <h2>Weather</h2>
-        <div id="weather"></div>
-        <div id="forecast"></div>
-    </div>
-
-    <div class="section">
-        <h2>Airport Webcam</h2>
-        <img id="webcam" src="https://s111.ipcamlive.com/streams/6fq1curexz5tx9gwi/stream.m3u8">
+    <div class="date-search">
+        <input type="date" id="datePicker">
+        <button onclick="searchFlights()">Search</button>
     </div>
 </div>
 
+<div class="section">
+    <h2>Arrivals</h2>
+    <div id="arrivals"></div>
+</div>
+
+<div class="section">
+    <h2>Departures</h2>
+    <div id="departures"></div>
+</div>
+
+<div class="section">
+    <h2>Weather</h2>
+    <div id="weather"></div>
+    <div id="forecast"></div>
+</div>
+
+<div class="section">
+    <h2>Airport Webcam</h2>
+    <video id="webcam" controls autoplay muted playsinline width="100%"></video>
+</div>
+```
+
+</div>
+
 <script src="script.js"></script>
+
+<script>
+    const video = document.getElementById('webcam');
+    const streamUrl = "https://s111.ipcamlive.com/streams/6fq1curexz5tx9gwi/stream.m3u8";
+
+    if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(streamUrl);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, function () {
+            video.play();
+        });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        // Safari support
+        video.src = streamUrl;
+        video.addEventListener('loadedmetadata', function () {
+            video.play();
+        });
+    } else {
+        console.error("HLS not supported in this browser.");
+    }
+</script>
 
 </body>
 </html>
