@@ -1,6 +1,6 @@
 //API KEYS
 
-const flightApiKey = "1ba43f5064d5b93c6997aed369497978";
+const flightApiKey = "62d0fefb0e8d869513abfd9e31535ed4";
 const weatherApiKey = "f5fb86d39d7cc2cc9d5f7c67db8fb37a";
 
 
