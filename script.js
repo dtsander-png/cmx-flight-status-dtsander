@@ -204,7 +204,7 @@ getWeather();
 
 
 //AUTO UPDATE EVERY 5 MINUTEs
-//setInterval(getFlights, 300000);
+setInterval(getFlights, 43200000);
 setInterval(getWeather, 300000);
 setInterval(refreshWebcam, 60000);
 
